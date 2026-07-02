@@ -1,0 +1,344 @@
+/* Retro visual-novel overlay. Sits above the (black) Phaser canvas. */
+
+:root {
+  --vn-pixel-font: "Press Start 2P", monospace;
+  /* Press Start 2P has no Thai glyphs, so dialogue/body fall back to a
+     Thai-capable font while keeping the boxes/labels pixel-styled. */
+  --vn-thai-font: "Noto Sans Thai", "Sarabun", "Leelawadee UI", "Tahoma", system-ui, sans-serif;
+  --vn-ink: #f4f4ff;
+  --vn-box: #10101c;
+  --vn-border: #ffffff;
+  --vn-boy: #b39ddb;
+  --vn-girl: #ff9ec4;
+}
+
+.vn-root {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+  background:
+    radial-gradient(120% 90% at 50% 0%, #1a1330 0%, #0b0b12 60%, #06060a 100%);
+  image-rendering: pixelated;
+  user-select: none;
+  cursor: pointer;
+  /* Fade into the VN scene from black. */
+  animation: vn-fade-in 600ms ease both;
+}
+
+@keyframes vn-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ---- Stage (portraits) --------------------------------------------------- */
+
+.vn-stage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4vw;
+  padding: 0 6vw 26vh;
+  transition: transform 1600ms ease-in-out;
+}
+
+/* Final hug: characters slide together and the camera "zooms in". */
+.vn-stage--hug {
+  justify-content: center;
+  gap: 2vw;
+  transform: scale(1.18);
+  animation: vn-hug-zoom 1800ms ease-in-out both;
+}
+
+@keyframes vn-hug-zoom {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.18);
+  }
+}
+
+.vn-portrait {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  transition:
+    opacity 250ms ease,
+    filter 250ms ease,
+    transform 250ms ease;
+}
+
+.vn-portrait__svg {
+  width: clamp(120px, 22vw, 260px);
+  height: auto;
+  image-rendering: pixelated;
+  filter: drop-shadow(4px 4px 0 rgba(0, 0, 0, 0.5));
+}
+
+.vn-portrait__name {
+  font-family: var(--vn-pixel-font);
+  font-size: clamp(8px, 1.4vw, 12px);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--vn-ink);
+}
+
+.vn-portrait--active {
+  opacity: 1;
+  transform: translateY(-6px);
+}
+
+.vn-portrait--dim {
+  opacity: 0.35;
+  filter: grayscale(0.7) brightness(0.7);
+}
+
+.vn-stage__heart {
+  align-self: flex-start;
+  margin-top: 4vh;
+  font-size: clamp(28px, 6vw, 64px);
+  animation: vn-heart-float 1600ms ease-out both;
+}
+
+@keyframes vn-heart-float {
+  0% {
+    transform: translateY(20px) scale(0.6);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-40px) scale(1);
+    opacity: 0.9;
+  }
+}
+
+/* ---- Dialogue box -------------------------------------------------------- */
+
+.vn-page {
+  position: relative;
+  z-index: 2;
+  animation: vn-page-fade 250ms ease both;
+}
+
+@keyframes vn-page-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.vn-dialogue {
+  margin: 0 auto;
+  width: min(1100px, 92vw);
+  min-height: clamp(150px, 26vh, 240px);
+  margin-bottom: max(18px, env(safe-area-inset-bottom));
+  padding: clamp(16px, 2.5vw, 28px);
+  background: var(--vn-box);
+  border: 3px solid var(--vn-border);
+  box-shadow:
+    0 0 0 3px #000,
+    8px 8px 0 0 rgba(0, 0, 0, 0.55);
+}
+
+.vn-dialogue__speaker {
+  display: inline-block;
+  margin-bottom: 0.9rem;
+  padding: 6px 10px;
+  font-family: var(--vn-pixel-font);
+  font-size: clamp(10px, 1.6vw, 14px);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #0b0b12;
+  background: var(--vn-ink);
+}
+
+.vn-dialogue__speaker--boy {
+  background: var(--vn-boy);
+}
+
+.vn-dialogue__speaker--girl {
+  background: var(--vn-girl);
+}
+
+.vn-dialogue__text {
+  margin: 0;
+  font-family: var(--vn-thai-font);
+  font-size: clamp(18px, 2.6vw, 30px);
+  line-height: 1.7;
+  color: var(--vn-ink);
+  word-break: break-word;
+}
+
+.vn-caret {
+  display: inline-block;
+  width: 0.55em;
+  height: 1.1em;
+  margin-left: 2px;
+  vertical-align: -0.15em;
+  background: var(--vn-ink);
+  animation: vn-blink 900ms step-end infinite;
+}
+
+@keyframes vn-blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  50.01%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.vn-dialogue__continue {
+  margin-top: 1rem;
+  text-align: right;
+  font-family: var(--vn-pixel-font);
+  font-size: clamp(8px, 1.2vw, 11px);
+  letter-spacing: 0.08em;
+  color: #ffd447;
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.vn-dialogue__continue.is-visible {
+  opacity: 1;
+  animation: vn-bob 1000ms ease-in-out infinite;
+}
+
+@keyframes vn-bob {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(6px);
+  }
+}
+
+/* ---- Final fade to black ------------------------------------------------- */
+
+.vn-fadeblack {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  /* Starts after the zoom, finishes as the happy ending takes over. */
+  animation: vn-fade-black 900ms ease-in 1650ms forwards;
+}
+
+@keyframes vn-fade-black {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ---- Happy ending -------------------------------------------------------- */
+
+.vn-happy {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(14px, 2.4vh, 26px);
+  padding: 6vw;
+  text-align: center;
+  background: #000;
+  animation: vn-fade-in 700ms ease both;
+}
+
+.vn-happy__header {
+  margin: 0;
+  font-family: var(--vn-pixel-font);
+  font-size: clamp(24px, 5vw, 52px);
+  letter-spacing: 0.08em;
+  color: #ffd447;
+  text-shadow: 4px 4px 0 rgba(233, 30, 99, 0.5);
+}
+
+.vn-happy__body {
+  margin: 0;
+  max-width: 22ch;
+  white-space: pre-line;
+  font-family: var(--vn-thai-font);
+  font-size: clamp(18px, 3vw, 30px);
+  line-height: 1.9;
+  color: var(--vn-ink);
+}
+
+.vn-happy__heart {
+  font-size: clamp(40px, 9vw, 90px);
+  animation: vn-pulse 1200ms ease-in-out infinite;
+}
+
+@keyframes vn-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.18);
+  }
+}
+
+.vn-happy__footer {
+  margin: 0;
+  font-family: var(--vn-pixel-font);
+  font-size: clamp(9px, 1.6vw, 14px);
+  letter-spacing: 0.1em;
+  color: #8be9fd;
+}
+
+.vn-happy__hint {
+  margin-top: 0.6rem;
+  font-family: var(--vn-pixel-font);
+  font-size: clamp(8px, 1.2vw, 10px);
+  letter-spacing: 0.1em;
+  color: #9b8fc0;
+  opacity: 0;
+  transition: opacity 400ms ease;
+}
+
+.vn-happy__hint.is-visible {
+  opacity: 1;
+  animation: vn-blink 1400ms step-end infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vn-root,
+  .vn-stage,
+  .vn-stage--hug,
+  .vn-page,
+  .vn-stage__heart,
+  .vn-fadeblack,
+  .vn-happy,
+  .vn-happy__heart,
+  .vn-dialogue__continue.is-visible,
+  .vn-caret {
+    animation-duration: 1ms;
+    transition-duration: 1ms;
+  }
+}
