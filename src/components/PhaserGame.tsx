@@ -38,13 +38,18 @@ function PhaserGame({
     const game = createGame(containerRef.current)
     gameRef.current = game
 
+    // Register touch input immediately so Level1Scene can read it on the first frame.
+    if (touchInput) {
+      game.registry.set("touchInput", touchInput)
+    }
+
     return () => {
       game.destroy(true)
       gameRef.current = null
     }
-  }, [])
+  }, [touchInput])
 
-  // Keep the exit callback and touch-input state available to the scenes.
+  // Keep the exit callback available to the scenes.
   useEffect(() => {
     gameRef.current?.registry.set("onExit", onExit)
   }, [onExit])

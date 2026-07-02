@@ -7,10 +7,11 @@ import TouchControls from "@/components/Controls/TouchControls"
 import MailModal from "@/components/Mail/MailModal"
 import MailNotification from "@/components/Mail/MailNotification"
 import { MAILS } from "@/components/Mail/mailData"
-import { createTouchInputState } from "@/game/touchInput"
+import { createTouchInputState, resetTouchInputState } from "@/game/touchInput"
 import { audioManager } from "@/game/audio"
 import { useIsTouchDevice } from "@/hooks/useIsTouchDevice"
 import { useSafeArea } from "@/hooks/useSafeArea"
+import { useTouchInputSafetyReset } from "@/hooks/useTouchInputSafetyReset"
 
 const PhaserGame = lazy(() => import("@/components/PhaserGame"))
 
@@ -31,6 +32,8 @@ export function App() {
   // Stable shared object read by the Phaser scene and mutated by TouchControls.
   const touchInputRef = useRef(createTouchInputState())
 
+  useTouchInputSafetyReset(touchInputRef.current, isPlaying)
+
   useEffect(() => {
     void audioManager.preload()
   }, [])
@@ -47,6 +50,7 @@ export function App() {
     audioManager.playClick()
     audioManager.transitionToMenuMusic()
     setShowHugButton(false)
+    resetTouchInputState(touchInputRef.current)
     setIsPlaying(false)
   }, [])
 
@@ -87,6 +91,7 @@ export function App() {
   // (Music is handled inside Phaser.)
   const handleVnStart = useCallback(() => {
     setShowHugButton(false)
+    resetTouchInputState(touchInputRef.current)
     setVnActive(true)
   }, [])
 

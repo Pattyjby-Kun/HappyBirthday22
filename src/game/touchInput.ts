@@ -17,3 +17,11 @@ export interface TouchInputState {
 export function createTouchInputState(): TouchInputState {
   return { left: false, right: false, jumpQueued: false, hugQueued: false }
 }
+
+/** Clears all touch flags (e.g. when controls unmount or the player exits). */
+export function resetTouchInputState(state: TouchInputState): void {
+  state.left = false
+  state.right = false
+  state.jumpQueued = false
+  state.hugQueued = false
+}
